@@ -1,0 +1,57 @@
+{% extends 'events/base.html' %}
+{% block title %}Events{% endblock %}
+
+{% block content %}
+
+<form method="get" class="mb-6 px-4 py-2 bg-gray-100 rounded">
+    <input type="text" name="q" placeholder="Search: Name/Location" value="{{ request.GET.q }}">
+    
+    <select name="category">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                {{ cat.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    Start Date: <input type="date" name="start_date" value="{{ request.GET.start_date }}">
+    End Date: <input type="date" name="end_date" value="{{ request.GET.end_date }}">
+
+    <button type="submit" class="border-2 border-black-100">Filter</button>
+</form>
+
+<p class="bg-gray-200">Total Participants Across All Events:</strong> {{ total_participants }}</p>
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-semibold">Events</h2>
+    <a href="{% url 'event_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded">Add Event</a>
+</div>
+
+<table class="table-auto w-full bg-white shadow rounded">
+    <thead>
+        <tr class="bg-gray-200">
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">Category</th>
+            <th class="px-4 py-2">Date</th>
+            <th class="px-4 py-2">Time</th>
+            <th class="px-4 py-2">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+        <tr class="border-b">
+            <td class="px-4 py-2">{{ event.name }}</td>
+            <td class="px-4 py-2">{{ event.category.name }}</td>
+            <td class="px-4 py-2">{{ event.date }}</td>
+            <td class="px-4 py-2">{{ event.time }}</td>
+            <td class="px-4 py-2 space-x-2">
+                <a href="{% url 'event_update' event.id %}" class="text-blue-500">Edit</a>
+                <a href="{% url 'event_delete' event.id %}" class="text-red-500">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center py-4">No events found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

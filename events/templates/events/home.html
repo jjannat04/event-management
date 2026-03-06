@@ -1,0 +1,12 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Event Management Home</h1>
+
+<div class="grid grid-cols-2 gap-4">
+  <a href="{% url 'event_list' %}" class="p-4 bg-blue-200 rounded text-center hover:bg-blue-300">Events</a>
+  <a href="{% url 'participant_list' %}" class="p-4 bg-blue-200 rounded text-center hover:bg-blue-300">Participants</a>
+  <a href="{% url 'category_list' %}" class="p-4 bg-blue-200 rounded text-center hover:bg-blue-300">Categories</a>
+  <a href="{% url 'dashboard' %}" class="p-4 bg-blue-200 rounded text-center hover:bg-blue-300">Organizer Dashboard</a>
+</div>
+{% endblock %}

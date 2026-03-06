@@ -1,0 +1,13 @@
+{% extends 'events/base.html' %}
+{% block title %}Create / Update Participant{% endblock %}
+
+{% block content %}
+<h2  class="text-2xl font-semibold mb-4">{% if form.instance.pk %}Update{% else %}Create{% endif %} Participant</h2>
+
+<form method="POST" class="bg-white p-6 shadow rounded space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="Submit" class="bg-blue-500 text-white px-4 py-2 rounded">{% if form.instance.pk %}Update{% else %}Create{% endif %}</button>
+</form>
+{% endblock %}
+

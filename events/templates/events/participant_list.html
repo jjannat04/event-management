@@ -1,0 +1,40 @@
+{% extends "events/base.html" %}
+{% block content %}
+<h2>All Participants</h2>
+
+<form method="get" class="mb-4">
+    <input type="text" name="q" placeholder="Search by participant name or email" value="{{ request.GET.q }}">
+    <button type="submit">Search</button>
+</form>
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-semibold">Participants</h2>
+    <a href="{% url 'participant_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded">Add Participant</a>
+</div>
+<table class="table-auto w-full bg-white shadow rounded">
+    <thead>
+        <tr class="bg-gray-200">
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">Email</th>
+            <th class="px-4 py-2">Events</th>
+            <th class="px-4 py-2">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for participant in participants %}
+        <tr class="border-b">
+            <td class="px-4 py-2">{{ participant.name }}</td>
+            <td class="px-4 py-2">{{ participant.email }}</td>
+            <td class="px-4 py-2">
+                {% for event in participant.events.all %}{{ event.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </td>
+            <td class="px-4 py-2 space-x-2">
+                <a href="{% url 'participant_update' participant.id %}" class="text-blue-500">Edit</a>
+                <a href="{% url 'participant_delete' participant.id %}" class="text-red-500">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center py-4">No participants found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
