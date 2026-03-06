@@ -28,7 +28,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1','event-management-1-ysfl.onrender.com']
 
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://event-management-1-ysfl.onrender.com"
+]
 # Application definition
 
 INSTALLED_APPS = [
