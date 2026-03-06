@@ -127,7 +127,7 @@ def participant_update(request, pk):
         form = ParticipantForm(request.POST, instance=participant)
         if form.is_valid():
             participant = form.save()
-            form.save_m2m()  
+            form.save()  
             return redirect('participant_list')
     else:
         form = ParticipantForm(instance=participant)
