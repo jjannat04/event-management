@@ -1,0 +1,38 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-10 p-8 bg-white shadow-lg rounded-lg border border-gray-200">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Update Information</h2>
+    
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        
+        <div>
+            <label class="block text-gray-700 font-bold mb-1">First Name</label>
+            {{ form.first_name }}
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-bold mb-1">Last Name</label>
+            {{ form.last_name }}
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-bold mb-1">Phone Number</label>
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.phone_number.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-bold mb-1">Profile Picture</label>
+            {{ form.profile_picture }}
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 mt-4">
+            Update All Info
+        </button>
+    </form>
+</div>
+{% endblock %}

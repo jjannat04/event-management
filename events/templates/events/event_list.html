@@ -41,7 +41,8 @@
     <tbody>
         {% for event in events %}
         <tr class="border-b">
-            <td class="px-4 py-2">{{ event.name }}</td>
+            <td class="px-4 py-2"><a href="{% url 'event_detail' event.pk %}" class="text-blue-600 hover:underline font-bold">
+                                    {{ event.name }}</a></td>
             <td class="px-4 py-2">{% if event.image %}
                 <img src="{{ event.image.url }}" width="120" class="justify-center items-center flex mx-auto">
                 {% else %}

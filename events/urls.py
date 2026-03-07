@@ -1,15 +1,17 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     
     path('', views.home, name='home'), 
     path('dashboard/', views.dashboard, name='dashboard'),
     
-    path('events', views.event_list, name='event_list'),           
-    path('create/', views.event_create, name='event_create'), 
-    path('<int:pk>/update/', views.event_update, name='event_update'), 
-    path('<int:pk>/delete/', views.event_delete, name='event_delete'), 
+    path('events/', views.EventListView.as_view(), name='event_list'),         
+    path('event/<int:pk>/', views.EventDetailView.as_view(), name='event_detail'),
+path('event/create/', views.EventCreateView.as_view(), name='event_create'),
+path('event/<int:pk>/edit/', views.EventUpdateView.as_view(), name='event_update'),
+path('event/<int:pk>/delete/', views.EventDeleteView.as_view(), name='event_delete'),
 
     path('participants/', views.participant_list, name='participant_list'), 
     path('participants/create/', views.participant_create, name='participant_create'),
@@ -28,5 +30,33 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('events/<int:pk>/rsvp/', views.rsvp_event, name='event_rsvp'),
     path('activate/<int:user_id>/<path:token>/', views.activate_account, name='activate_account'),
+
+    path('profile/', views.ProfileDetailView.as_view(), name='profile_detail'),
+    path('profile/edit/', views.ProfileUpdateView.as_view(), name='profile_edit'),
+
+
+   
+
+    path('password-change/', auth_views.PasswordChangeView.as_view(
+        template_name='events/password_change.html',
+        success_url='/events/profile/'
+    ), name='password_change'),
+
+    path('password-reset/', auth_views.PasswordResetView.as_view(
+        template_name='events/password_reset.html'
+    ), name='password_reset'),
+
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='events/password_reset_done.html'
+    ), name='password_reset_done'),
+
+    path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='events/password_reset_confirm.html'
+    ), name='password_reset_confirm'),
+
+    path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='events/password_reset_complete.html'
+    ), name='password_reset_complete'),
+
 
     ]

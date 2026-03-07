@@ -10,6 +10,8 @@ from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import Event
+from .models import UserProfile
+
 
 @receiver(post_save, sender=User)
 def send_activation_email(sender, instance, created, **kwargs):
@@ -48,3 +50,18 @@ def send_rsvp_email(sender, instance, action, pk_set, **kwargs):
                 [user.email],
                 fail_silently=True,
             )        
+
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()     
+
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    UserProfile.objects.get_or_create(user=instance)           

@@ -12,52 +12,54 @@
 <body class="bg-gray-100 font-sans">
 
     <!-- Navbar -->
-<nav class="bg-blue-600 p-4 text-white">
-    <div class="container mx-auto flex justify-between items-center">
-        <!-- Logo / Home -->
-        <a href="{% url 'home' %}" class="font-bold text-lg">Event Management</a>
+    <nav class="bg-blue-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Logo / Home -->
+            <a href="{% url 'home' %}" class="font-bold text-lg">Event Management</a>
 
-        <!-- Links -->
-        <div class="flex items-center space-x-4">
+            <!-- Links -->
+            <div class="flex items-center space-x-4">
 
-            {% if user.is_authenticated %}
+                {% if user.is_authenticated %}
                 {% for group in user.groups.all %}
-                    {% if group.name == "Admin" %}
-                        <a href="{% url 'event_list' %}" class="hover:underline">Events</a>
-                        <a href="{% url 'participant_list' %}" class="hover:underline">Participants</a>
-                        <a href="{% url 'category_list' %}" class="hover:underline">Categories</a>
+                {% if group.name == "Admin" %}
+                <a href="{% url 'event_list' %}" class="hover:underline">Events</a>
+                <a href="{% url 'participant_list' %}" class="hover:underline">Participants</a>
+                <a href="{% url 'category_list' %}" class="hover:underline">Categories</a>
 
-                    {% elif group.name == "Organizer" %}
-                        <a href="{% url 'event_list' %}" class="hover:underline">Events</a>
-                        <a href="{% url 'category_list' %}" class="hover:underline">Categories</a>
+                {% elif group.name == "Organizer" %}
+                <a href="{% url 'event_list' %}" class="hover:underline">Events</a>
+                <a href="{% url 'category_list' %}" class="hover:underline">Categories</a>
 
-                    {% elif group.name == "Participant" %}
-                        <a href="{% url 'event_list' %}" class="hover:underline">Events</a>
-                        <a href="{% url 'participant_dashboard' %}" class="hover:underline">My RSVPs</a>
-                    {% endif %}
+                {% elif group.name == "Participant" %}
+                <a href="{% url 'event_list' %}" class="hover:underline">Events</a>
+                <a href="{% url 'participant_dashboard' %}" class="hover:underline">My RSVPs</a>
+                {% endif %}
                 {% endfor %}
 
                 <!-- Greeting and Logout -->
-                <span class="ml-4">Hi, {{ user.username }}</span>
-                <a href="{% url 'logout' %}" 
-                   class="px-3 py-1 border rounded hover:bg-blue-700 transition ml-2">
-                   Logout
+                <span class="ml-4 text-white-700 font-medium">
+                    Hi, <a href="{% url 'profile_detail' %}"
+                        class="text-white-600 hover:text-blue-300 hover:underline transition">
+                        {{ user.username }}
+                    </a>
+                </span>
+                <a href="{% url 'logout' %}" class="px-3 py-1 border rounded hover:bg-blue-700 transition ml-2">
+                    Logout
                 </a>
 
-            {% else %}
+                {% else %}
                 <!-- Signup/Login for Guests -->
-                <a href="{% url 'signup' %}" 
-                   class="px-3 py-1 border rounded hover:bg-blue-700 transition ml-2">
-                   Signup
+                <a href="{% url 'signup' %}" class="px-3 py-1 border rounded hover:bg-blue-700 transition ml-2">
+                    Signup
                 </a>
-                <a href="{% url 'login' %}" 
-                   class="px-3 py-1 border rounded hover:bg-blue-700 transition ml-2">
-                   Login
+                <a href="{% url 'login' %}" class="px-3 py-1 border rounded hover:bg-blue-700 transition ml-2">
+                    Login
                 </a>
-            {% endif %}
+                {% endif %}
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
     <!-- Main Content -->
     <div class="container mx-auto mt-6">

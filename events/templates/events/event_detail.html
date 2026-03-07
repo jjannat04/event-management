@@ -1,0 +1,40 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <div class="mb-6">
+        <img src="{{ event.image.url }}" alt="{{ event.name }}" class="w-full h-96 object-cover rounded-lg">
+    </div>
+
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h1 class="text-4xl font-bold text-gray-800">{{ event.name }}</h1>
+            <p class="text-blue-600 font-semibold">{{ event.category.name }}</p>
+        </div>
+        <div class="text-right">
+            <p class="text-gray-600 font-medium">{{ event.date }}</p>
+            <p class="text-gray-500">{{ event.time }}</p>
+        </div>
+    </div>
+
+    <div class="border-t border-b py-6 mb-6">
+        <h2 class="text-xl font-semibold mb-2">Description</h2>
+        <p class="text-gray-700 leading-relaxed">{{ event.description }}</p>
+    </div>
+
+    <div class="flex items-center justify-between">
+        <div class="text-gray-600">
+            <span class="font-bold">Location:</span> {{ event.location }}<br>
+            <span class="font-bold">Organizer:</span> {{ event.organizer.username }}
+        </div>
+        
+        <div class="space-x-4">
+            {% if user == event.organizer %}
+                <a href="{% url 'event_update' event.pk %}" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Edit</a>
+                <a href="{% url 'event_delete' event.pk %}" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete</a>
+            {% endif %}
+            <a href="{% url 'event_list' %}" class="text-gray-600 hover:underline">Back to Events</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

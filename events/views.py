@@ -17,6 +17,10 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.urls import reverse
+from .models import Event
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from .models import UserProfile
 
 User = get_user_model()
 
@@ -304,44 +308,32 @@ def activate_account(request, user_id, token):
     except User.DoesNotExist:
         return HttpResponse('User not found')
     
-
-
 def user_login(request):
-
     error = None
-
     if request.method == "POST":
-
         username = request.POST.get("username")
         password = request.POST.get("password")
-
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-
             if not user.is_active:
                 error = "Please activate your account first."
-
             else:
+               
+                UserProfile.objects.get_or_create(user=user)
+                
                 login(request, user)
 
-                # Admin dashboard
                 if user.groups.filter(name="Admin").exists():
                     return redirect("admin_dashboard")
-
-                # Organizer dashboard
                 elif user.groups.filter(name="Organizer").exists():
                     return redirect("organizer_dashboard")
-
-                # Participant dashboard
                 else:
                     return redirect("participant_dashboard")
-
         else:
             error = "Invalid username or password."
 
     return render(request, "events/login.html", {"error": error})
-
 
 def user_logout(request):
     logout(request)
@@ -408,3 +400,57 @@ def rsvp_event(request, pk):
         )
 
     return redirect('event_list')
+
+class EventListView(ListView):
+    model = Event
+    template_name = 'events/event_list.html'  
+    context_object_name = 'events'   
+    
+class EventDetailView(DetailView):
+    model = Event
+    template_name = 'events/event_detail.html'
+    context_object_name = 'event'
+
+from .forms import EventForm
+
+class EventCreateView(CreateView):
+    model = Event
+    form_class = EventForm # Use form_class instead of fields
+    template_name = 'events/event_form.html'
+    success_url = reverse_lazy('event_list')
+
+    def form_valid(self, form):
+        form.instance.organizer = self.request.user
+        return super().form_valid(form)
+
+class EventUpdateView(UpdateView):
+    model = Event
+    form_class = EventForm # Use form_class instead of fields
+    template_name = 'events/event_form.html'
+    success_url = reverse_lazy('event_list')
+
+class EventDeleteView(DeleteView):
+    model = Event
+    template_name = 'events/event_confirm_delete.html'
+    success_url = reverse_lazy('event_list')   
+
+
+
+class ProfileDetailView(DetailView):
+    model = UserProfile
+    template_name = 'events/profile_detail.html'
+    context_object_name = 'profile'
+
+    def get_object(self):
+        return self.request.user.profile
+
+from .forms import UserProfileForm
+
+class ProfileUpdateView(UpdateView):
+    model = UserProfile
+    form_class = UserProfileForm
+    template_name = 'events/profile_form.html'
+    success_url = reverse_lazy('profile_detail')
+
+    def get_object(self):
+        return self.request.user.profile          

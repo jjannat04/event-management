@@ -1,22 +1,43 @@
 {% extends 'events/base.html' %}
 
 {% block content %}
+<div class="max-w-md mx-auto mt-16 p-8 bg-white shadow-xl rounded-lg border border-gray-200">
+    <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Login</h2>
 
-<h2>Login</h2>
-{% if error %}
-<p class="text-red-500">{{ error }}</p>
-{% endif %}
-<form method="POST">
-    {% csrf_token %}
+    {% if error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm">
+            {{ error }}
+        </div>
+    {% endif %}
 
-    <label>Username</label>
-    <input type="text" name="username">
+    <form method="POST" class="space-y-5">
+        {% csrf_token %}
 
-    <label>Password</label>
-    <input type="password" name="password">
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Username</label>
+            <input type="text" name="username" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
 
-    <button type="submit">Login</button>
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Password</label>
+            <input type="password" name="password" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
 
-</form>
+        <button type="submit" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-md transition duration-200">
+            Login
+        </button>
 
+        <div class="flex justify-between items-center mt-4 text-sm">
+            <a href="{% url 'password_reset' %}" class="text-blue-600 hover:underline">
+                Forgot Password?
+            </a>
+            <span class="text-gray-500">
+                New here? <a href="{% url 'signup' %}" class="text-blue-600 hover:underline">Sign Up</a>
+            </span>
+        </div>
+    </form>
+</div>
 {% endblock %}
