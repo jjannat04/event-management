@@ -1,13 +1,24 @@
 {% extends 'events/base.html' %}
-{% block title %}Create / Update Participant{% endblock %}
 
 {% block content %}
-<h2  class="text-2xl font-semibold mb-4">{% if form.instance.pk %}Update{% else %}Create{% endif %} Participant</h2>
-
-<form method="POST" class="bg-white p-6 shadow rounded space-y-4">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="Submit" class="bg-blue-500 text-white px-4 py-2 rounded">{% if form.instance.pk %}Update{% else %}Create{% endif %}</button>
-</form>
+<div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
+    <h2 class="text-2xl font-bold mb-4">Add Participant</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        {% for field in form %}
+            <div class="mb-4">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <p class="text-red-500 text-sm">{{ field.errors|striptags }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Participant</button>
+    </form>
+</div>
 {% endblock %}
-

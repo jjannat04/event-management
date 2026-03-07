@@ -1,0 +1,44 @@
+{% extends 'events/base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<p class="text-gray-600 mb-4">
+Welcome, <strong>{{ request.user.username }}</strong>!
+</p>
+<div class="max-w-5xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
+
+    <h2 class="text-2xl font-bold mb-4">Admin Dashboard</h2>
+
+    <p class="mb-6 text-gray-700">
+        As an <strong>Admin</strong>, you have full control over the event management system.
+        You can create and manage events, manage categories, and monitor all participants.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div class="bg-blue-100 p-4 rounded-lg shadow">
+            <h3 class="font-semibold text-lg mb-2">Manage Events</h3>
+            <p class="text-sm text-gray-700">
+                Create, update, and delete events in the system.
+            </p>
+        </div>
+
+        <div class="bg-green-100 p-4 rounded-lg shadow">
+            <h3 class="font-semibold text-lg mb-2">Manage Categories</h3>
+            <p class="text-sm text-gray-700">
+                Add or edit event categories for better organization.
+            </p>
+        </div>
+
+        <div class="bg-yellow-100 p-4 rounded-lg shadow">
+            <h3 class="font-semibold text-lg mb-2">View Participants</h3>
+            <p class="text-sm text-gray-700">
+                See all users and monitor participation.
+            </p>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

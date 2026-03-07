@@ -1,40 +1,70 @@
 {% extends "events/base.html" %}
-{% block content %}
-<h2>All Participants</h2>
+{% block title %}Participants{% endblock %}
 
-<form method="get" class="mb-4">
-    <input type="text" name="q" placeholder="Search by participant name or email" value="{{ request.GET.q }}">
-    <button type="submit">Search</button>
-</form>
-<div class="flex justify-between items-center mb-4">
-    <h2 class="text-2xl font-semibold">Participants</h2>
-    <a href="{% url 'participant_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded">Add Participant</a>
+{% block content %}
+<div class="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold mb-4 md:mb-0">Participants</h2>
+        <a href="{% url 'participant_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Add Participant
+        </a>
+    </div>
+
+    <!-- Search Form -->
+    <form method="get" class="flex flex-col md:flex-row gap-2 items-center mb-6">
+        <input type="text" name="q" placeholder="Search by username or email" value="{{ request.GET.q }}" 
+               class="border border-gray-300 px-3 py-2 rounded w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Search
+        </button>
+    </form>
+
+    <!-- Total Participants -->
+    <p class="mb-4 text-gray-700 font-medium">
+        Total Participants: <span class="font-bold">{{ total_participants }}</span>
+    </p>
+
+    <!-- Participants Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+            <thead class="bg-gray-100 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-3 text-left text-gray-700 font-semibold">Username</th>
+                    <th class="px-4 py-3 text-left text-gray-700 font-semibold">Email</th>
+                    <th class="px-4 py-3 text-left text-gray-700 font-semibold">Events</th>
+                    <th class="px-4 py-3 text-left text-gray-700 font-semibold">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for participant in participants %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-3">{{ participant.username }}</td>
+                    <td class="px-4 py-3">{{ participant.email }}</td>
+                    <td class="px-4 py-3">
+                        {% for event in participant.events.all %}
+                            <span class="inline-block bg-gray-200 px-2 py-1 rounded-full text-sm mr-1 mb-1">
+                                {{ event.name }}
+                            </span>
+                        {% empty %}
+                            <span class="text-gray-400 italic">None</span>
+                        {% endfor %}
+                    </td>
+                    <td class="px-4 py-3 space-x-2">
+                        <a href="{% url 'participant_delete' participant.id %}" class="text-red-500 hover:underline">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-6 text-gray-500 italic">
+                        No participants found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-<table class="table-auto w-full bg-white shadow rounded">
-    <thead>
-        <tr class="bg-gray-200">
-            <th class="px-4 py-2">Name</th>
-            <th class="px-4 py-2">Email</th>
-            <th class="px-4 py-2">Events</th>
-            <th class="px-4 py-2">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for participant in participants %}
-        <tr class="border-b">
-            <td class="px-4 py-2">{{ participant.name }}</td>
-            <td class="px-4 py-2">{{ participant.email }}</td>
-            <td class="px-4 py-2">
-                {% for event in participant.events.all %}{{ event.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
-            </td>
-            <td class="px-4 py-2 space-x-2">
-                <a href="{% url 'participant_update' participant.id %}" class="text-blue-500">Edit</a>
-                <a href="{% url 'participant_delete' participant.id %}" class="text-red-500">Delete</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" class="text-center py-4">No participants found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% endblock %}
