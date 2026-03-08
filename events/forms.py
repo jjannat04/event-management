@@ -2,7 +2,9 @@ from django import forms
 from .models import Event, Category
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import UserProfile
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class EventForm(forms.ModelForm):
@@ -53,35 +55,22 @@ class SignupForm(UserCreationForm):
 
 
 
-
-
-
-class UserProfileForm(forms.ModelForm):
-    first_name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded'}))
-    last_name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded'}))
-
+class EditProfileForm(forms.ModelForm):
     class Meta:
-        model = UserProfile
-        fields = ['profile_picture', 'phone_number']
+        model = User
+        
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'profile_image']
         widgets = {
-            'phone_number': forms.TextInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded', 'placeholder': 'e.g. +88017...'}),
-            'profile_picture': forms.FileInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded'}),
+            'phone_number': forms.TextInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded'}),
+            'profile_image': forms.FileInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance and self.instance.user:
-            self.fields['first_name'].initial = self.instance.user.first_name
-            self.fields['last_name'].initial = self.instance.user.last_name
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import get_user_model
 
-    def save(self, commit=True):
-        profile = super().save(commit=False)
-        user = profile.user
-        user.first_name = self.cleaned_data['first_name']
-        user.last_name = self.cleaned_data['last_name']
-        if commit:
-            user.save()
-            profile.save()
-        return profile
+User = get_user_model()
 
-        
+class CustomUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = UserCreationForm.Meta.fields + ('phone_number', 'profile_image', 'email', 'first_name', 'last_name')        

@@ -7,32 +7,31 @@
     <form method="post" enctype="multipart/form-data" class="space-y-4">
         {% csrf_token %}
         
-        <div>
-            <label class="block text-gray-700 font-bold mb-1">First Name</label>
-            {{ form.first_name }}
-        </div>
-
-        <div>
-            <label class="block text-gray-700 font-bold mb-1">Last Name</label>
-            {{ form.last_name }}
-        </div>
-
-        <div>
-            <label class="block text-gray-700 font-bold mb-1">Phone Number</label>
-            {{ form.phone_number }}
-            {% if form.phone_number.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.phone_number.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div>
-            <label class="block text-gray-700 font-bold mb-1">Profile Picture</label>
-            {{ form.profile_picture }}
-        </div>
+        {% for field in form %}
+            <div>
+                <label class="block text-gray-700 font-bold mb-1">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
 
         <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 mt-4">
             Update All Info
         </button>
     </form>
 </div>
+
+<style>
+    /* Styling the auto-generated Django inputs to look like the rest of the site */
+    input[type="text"], input[type="email"], input[type="file"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+    }
+</style>
 {% endblock %}

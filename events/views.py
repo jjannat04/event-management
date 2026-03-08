@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q, Count, Prefetch
 from django.utils import timezone
 from .models import Event, Category
-from .forms import EventForm, ParticipantForm, CategoryForm
+from .forms import EventForm, ParticipantForm, CategoryForm, CustomUserCreationForm, EditProfileForm
 from .forms import SignupForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -20,7 +20,20 @@ from django.urls import reverse
 from .models import Event
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from .models import UserProfile
+from django import forms
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        # Notice we use 'profile_image' NOT 'profile_picture'
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'profile_image']
+        widgets = {
+            'phone_number': forms.TextInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded'}),
+            'profile_image': forms.FileInput(attrs={'class': 'w-full p-2 border border-gray-300 rounded'}),
+        }
 
 User = get_user_model()
 
@@ -31,7 +44,7 @@ def is_organizer(user):
     return user.groups.filter(name='Organizer').exists()
 
 def is_participant(user):
-    return user.groups.filter(name='Participant').exists()
+    return user.is_authenticated and user.is_participant
 
 @login_required(login_url='login')
 def home(request):
@@ -275,20 +288,44 @@ def participant_dashboard(request):
     rsvped_events = user.rsvped_events.all()  # all events this user RSVPed to
     return render(request, 'events/participant_dashboard.html', {'rsvped_events': rsvped_events})
 
+from django.core.mail import send_mail
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
 
 def signup(request):
-    form = SignupForm(request.POST or None)
-    if request.method == "POST":
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False
+            user.is_active = False # Deactivate account until email is confirmed
             user.save()
+
 
             participant_group, created = Group.objects.get_or_create(name='Participant')
             user.groups.add(participant_group)
-            return render(request, "events/activation_sent.html")
-    return render(request, 'events/signup.html', {'form': form})
 
+
+            # --- Activation Email Logic ---
+            current_site = get_current_site(request)
+            mail_subject = 'Activate your account.'
+            message = render_to_string('events/acc_active_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+            })
+            to_email = form.cleaned_data.get('email')
+            
+            # This is what prints to your terminal
+            send_mail(mail_subject, message, 'admin@event.com', [to_email])
+            
+            return render(request, 'events/activation_sent.html')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'events/signup.html', {'form': form})
 
 def activate_account(request, user_id, token):
     try:
@@ -307,7 +344,30 @@ def activate_account(request, user_id, token):
 
     except User.DoesNotExist:
         return HttpResponse('User not found')
+
+
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+
+User = get_user_model()
+
+def activate(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return redirect('login')
+    else:
+        return render(request, 'events/activation_failed.html')
     
+
 def user_login(request):
     error = None
     if request.method == "POST":
@@ -319,9 +379,7 @@ def user_login(request):
             if not user.is_active:
                 error = "Please activate your account first."
             else:
-               
-                UserProfile.objects.get_or_create(user=user)
-                
+                # REMOVED: UserProfile get_or_create line (It's no longer needed!)
                 login(request, user)
 
                 if user.groups.filter(name="Admin").exists():
@@ -382,24 +440,17 @@ def participant_dashboard(request):
     )
 
 @login_required(login_url='login')
-@user_passes_test(is_participant)
 def rsvp_event(request, pk):
     event = get_object_or_404(Event, pk=pk)
-    user = request.user
-
-    if user not in event.participants.all():
-        event.participants.add(user)
-
-        # Send confirmation email
-        send_mail(
-            subject=f"RSVP Confirmation for {event.name}",
-            message=f"Hi {user.first_name},\n\nYou have successfully RSVPed for the event '{event.name}' on {event.date}.",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=True,
-        )
-
+    
+    # Use the related_name you defined: 'rsvped_events'
+    if event.participants.filter(id=request.user.id).exists():
+        event.participants.remove(request.user)
+    else:
+        event.participants.add(request.user)
+        
     return redirect('event_list')
+
 
 class EventListView(ListView):
     model = Event
@@ -423,34 +474,46 @@ class EventCreateView(CreateView):
         form.instance.organizer = self.request.user
         return super().form_valid(form)
 
-class EventUpdateView(UpdateView):
+
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import UpdateView, DeleteView, CreateView
+
+# --- EXAMPLE: EVENT EDIT (Admin Only) ---
+class EventUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Event
-    form_class = EventForm # Use form_class instead of fields
-    template_name = 'events/event_form.html'
-    success_url = reverse_lazy('event_list')
+    fields = '__all__'
+    
+    def test_func(self):
+        # Admin > Everything
+        return self.request.user.is_superuser or self.request.user.is_admin
 
-class EventDeleteView(DeleteView):
-    model = Event
-    template_name = 'events/event_confirm_delete.html'
-    success_url = reverse_lazy('event_list')   
-
-
-
+# --- EXAMPLE: CATEGORY EDIT (Admin & Organizer) ---
+class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Category
+    fields = '__all__'
+    
+    def test_func(self):
+        # Admin or Organizer can edit categories
+        user = self.request.user
+        return user.is_superuser or user.is_admin or user.is_organizer
+    
 class ProfileDetailView(DetailView):
-    model = UserProfile
+    model = settings.AUTH_USER_MODEL
     template_name = 'events/profile_detail.html'
-    context_object_name = 'profile'
+    context_object_name = 'user_profile' 
 
     def get_object(self):
-        return self.request.user.profile
+        return self.request.user
+    
 
-from .forms import UserProfileForm
 
 class ProfileUpdateView(UpdateView):
-    model = UserProfile
-    form_class = UserProfileForm
+    model = User
+    
+    fields = ['first_name', 'last_name', 'email', 'phone_number', 'profile_image']
     template_name = 'events/profile_form.html'
     success_url = reverse_lazy('profile_detail')
 
     def get_object(self):
-        return self.request.user.profile          
+        
+        return self.request.user

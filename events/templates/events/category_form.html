@@ -3,7 +3,21 @@
 
 {% block content %}
 <h2 class="text-2xl font-semibold mb-4">{{ form.instance.id|yesno:"Update Category,Create Category" }}</h2>
-
+<style>
+    form input, form textarea, form select {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: 1px solid #d1d5db; /* gray-300 */
+        border-radius: 0.5rem;      /* rounded-lg */
+        margin-top: 0.25rem;
+        margin-bottom: 1rem;
+        outline: none;
+    }
+    form input:focus {
+        border-color: #3b82f6;     /* blue-500 */
+        ring: 2px #3b82f6;
+    }
+    </style>
 <form method="POST" class="bg-white p-6 shadow rounded space-y-4">
     {% csrf_token %}
     {{ form.as_p }}

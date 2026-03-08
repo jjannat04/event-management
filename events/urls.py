@@ -11,7 +11,7 @@ urlpatterns = [
     path('event/<int:pk>/', views.EventDetailView.as_view(), name='event_detail'),
 path('event/create/', views.EventCreateView.as_view(), name='event_create'),
 path('event/<int:pk>/edit/', views.EventUpdateView.as_view(), name='event_update'),
-path('event/<int:pk>/delete/', views.EventDeleteView.as_view(), name='event_delete'),
+path('event/<int:pk>/delete/', views.event_delete, name='event_delete'),
 
     path('participants/', views.participant_list, name='participant_list'), 
     path('participants/create/', views.participant_create, name='participant_create'),
@@ -22,7 +22,7 @@ path('event/<int:pk>/delete/', views.EventDeleteView.as_view(), name='event_dele
 
     path('categories/', views.category_list, name='category_list'), 
     path('categories/create/', views.category_create, name='category_create'),
-    path('categories/<int:pk>/update/', views.category_update, name='category_update'),
+    path('categories/<int:pk>/update/', views.CategoryUpdateView.as_view(), name='category_update'),
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
 
     path('signup/', views.signup, name='signup'),
@@ -33,7 +33,7 @@ path('event/<int:pk>/delete/', views.EventDeleteView.as_view(), name='event_dele
 
     path('profile/', views.ProfileDetailView.as_view(), name='profile_detail'),
     path('profile/edit/', views.ProfileUpdateView.as_view(), name='profile_edit'),
-
+    path('activate/<uidb64>/<token>/', views.activate, name='activate'),
 
    
 
